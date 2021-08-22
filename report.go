@@ -6,19 +6,26 @@ import (
 	"gopkg.in/ukautz/clif.v1"
 )
 
+// callBackFunction - callback function for command
 func callBackFunction(c *clif.Command) {
-	org := c.Option("organization").String()
+	orgName := c.Option("organization").String()
 	authKey := c.Option("auth-key").String()
 
-	fmt.Println("hi")
-	fmt.Println(org)
+	fmt.Println(orgName)
 	fmt.Println(authKey)
 
 	// create git handler
 	gitHandler := handlers.NewRequestHandler(authKey)
 
-	// list repositories
-	gitHandler.ListRepositories()
+	// get repo information from github
+	contributorRepoDetails, repoLanguageDetails, err := gitHandler.ListRepositories(orgName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// handle response
+	gitHandler.HandleResponse(contributorRepoDetails, repoLanguageDetails)
 }
 
 func main() {
@@ -29,6 +36,4 @@ func main() {
 		NewOption("auth-key", "a", "Github Auth Key", "", true, false)
 	cli.Add(cmd)
 	cli.Run()
-
-
 }
