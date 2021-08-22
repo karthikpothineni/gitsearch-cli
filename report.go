@@ -6,23 +6,34 @@ import (
 	"gopkg.in/ukautz/clif.v1"
 )
 
+// report constants
+const (
+	defaultProgressBarSize        = 100
+	defaultProgressBarRenderWidth = 80
+)
+
 // callBackFunction - callback function for command
 func callBackFunction(c *clif.Command) {
 	orgName := c.Option("organization").String()
 	authKey := c.Option("auth-key").String()
 
-	fmt.Println(orgName)
-	fmt.Println(authKey)
-
 	// create git handler
 	gitHandler := handlers.NewRequestHandler(authKey)
 
+	// start progress bar
+	fmt.Println("Progress:")
+	progressBar := clif.NewProgressBar(defaultProgressBarSize).SetStyle(clif.ProgressBarStyleAscii)
+	progressBar.SetRenderWidth(defaultProgressBarRenderWidth)
+
 	// get repo information from github
-	contributorRepoDetails, repoLanguageDetails, err := gitHandler.ListRepositories(orgName)
+	contributorRepoDetails, repoLanguageDetails, err := gitHandler.FetchRepositoriesInfo(orgName, progressBar)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	// finish progress bar
+	progressBar.Finish()
 
 	// handle response
 	gitHandler.HandleResponse(contributorRepoDetails, repoLanguageDetails)
