@@ -26,13 +26,11 @@ Replace ```{org name}``` with github organization name and ```{personal token}``
 ### Sample Output
 ```$xslt
 login;name;email;repositories;languages
-avelino;;;lint, gofrontend;Makefile, Awk, C++, C, M4, Assembly, Fortran, Go, Shell
-quasilyte;;;protobuf;Go, Shell
-spf13;;;blog;
-dddent;;;image;Go, Assembly
-tombergan;;;net;Makefile, Go, Dockerfile, Assembly
-pasztorpisti;;;mock;Go, Shell
-crawshaw;;;lint, go, review, exp, mobile, talks, build;CSS, Shell, Go, Makefile, HTML, Dockerfile
+atotto;Ato Araki;ato.araki@gmail.com;lint;Go, Emacs Lisp, Vim script
+AdityaHarindar;Aditya Harindar;aditya.harindar@gmail.com;groupcache;Go
+alexrudd;Alex Rudd;;protobuf;Go, Shell
+ScruffyProdigy;Ryan Kohler;;oauth2;Go
+sridharv;Sridhar Venkatakrishnan;sridhar@laddoo.net;mobile;Objective-C, Java, C, HTML, Assembly, Go
 ```
 
 ## Code Coverage

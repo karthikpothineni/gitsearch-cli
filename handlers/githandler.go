@@ -73,21 +73,31 @@ func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repos
 		fmt.Print("\r" + progressBar.Render())
 		_ = progressBar.Increment()
 		if eachRepo.Name != nil {
+
 			// get contributors for a repo
 			contributors, _, err := r.GitClient.Repositories.ListContributors(r.UserContext, orgName, *eachRepo.Name, nil)
 			if err == nil {
 				for _, eachContributor := range contributors {
-					contributorDetails := fmt.Sprintf("%s;%s;%s", utils.HandleNilString(eachContributor.Login), utils.HandleNilString(eachContributor.Name), utils.HandleNilString(eachContributor.Email))
-					if repos, ok := contributorRepoDetails[contributorDetails]; ok {
-						repos = append(repos, *eachRepo.Name)
-						contributorRepoDetails[contributorDetails] = repos
-					} else {
-						contributorRepoDetails[contributorDetails] = []string{*eachRepo.Name}
+					if eachContributor.Login != nil {
+						var contributorDetails string
+						userData, _, err := r.GitClient.Users.Get(r.UserContext, *eachContributor.Login)
+						if err != nil {
+							contributorDetails = fmt.Sprintf("%s;%s;%s", *eachContributor.Login, "", "")
+						} else {
+							contributorDetails = fmt.Sprintf("%s;%s;%s", *eachContributor.Login, utils.HandleNilString(userData.Name), utils.HandleNilString(userData.Email))
+						}
+						if repos, ok := contributorRepoDetails[contributorDetails]; ok {
+							repos = append(repos, *eachRepo.Name)
+							contributorRepoDetails[contributorDetails] = repos
+						} else {
+							contributorRepoDetails[contributorDetails] = []string{*eachRepo.Name}
+						}
 					}
 				}
 			} else {
 				repoErr = fmt.Errorf("unable to list contributors: %s", err.Error())
 			}
+
 			// get languages for a repo
 			languages, _, err := r.GitClient.Repositories.ListLanguages(r.UserContext, orgName, *eachRepo.Name)
 			if err == nil {
