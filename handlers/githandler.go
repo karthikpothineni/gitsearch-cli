@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gitsearch-cli/utils"
 	"gopkg.in/ukautz/clif.v1"
-	"reflect"
 	"strings"
 
 	"github.com/google/go-github/v38/github"
@@ -41,10 +41,10 @@ func (r *RequestHandler) FetchRepositoriesInfo(orgName string, progressBar clif.
 	repos, _, err := r.GitClient.Repositories.ListByOrg(r.UserContext, orgName, nil)
 	if err != nil {
 		if _, ok := err.(*github.RateLimitError); ok {
-			err = errors.New("Hit rate limit. Only 5000 requests per hour are allowed")
+			err = errors.New("hit rate limit. only 5000 requests per hour are allowed")
 			return nil, nil, err
 		}
-		err = fmt.Errorf("Error occurred while listing repos: %s", err.Error())
+		err = fmt.Errorf("error occurred while listing repos: %s", err.Error())
 		return nil, nil, err
 	}
 
@@ -61,9 +61,10 @@ func (r *RequestHandler) FetchRepositoriesInfo(orgName string, progressBar clif.
 func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repository, progressBar clif.ProgressBar, orgName string) (map[string][]string, map[string][]string, error) {
 	contributorRepoDetails := make(map[string][]string)
 	repoLanguageDetails := make(map[string][]string)
-	var err error
+	var repoErr error
 
 	// get contributors and language info
+	fmt.Println("Progress:")
 	for _, eachRepo := range repos {
 		fmt.Print("\r" + progressBar.Render())
 		_ = progressBar.Increment()
@@ -72,7 +73,7 @@ func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repos
 			contributors, _, err := r.GitClient.Repositories.ListContributors(r.UserContext, orgName, *eachRepo.Name, nil)
 			if err == nil {
 				for _, eachContributor := range contributors {
-					contributorDetails := fmt.Sprintf("%s;%s;%s", handleNilString(eachContributor.Login), handleNilString(eachContributor.Name), handleNilString(eachContributor.Email))
+					contributorDetails := fmt.Sprintf("%s;%s;%s", utils.HandleNilString(eachContributor.Login), utils.HandleNilString(eachContributor.Name), utils.HandleNilString(eachContributor.Email))
 					if repos, ok := contributorRepoDetails[contributorDetails]; ok {
 						repos = append(repos, *eachRepo.Name)
 						contributorRepoDetails[contributorDetails] = repos
@@ -81,20 +82,20 @@ func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repos
 					}
 				}
 			} else {
-				err = fmt.Errorf("Unable to list contributors: %s", err.Error())
+				repoErr = fmt.Errorf("unable to list contributors: %s", err.Error())
 			}
 			// get languages for a repo
 			languages, _, err := r.GitClient.Repositories.ListLanguages(r.UserContext, orgName, *eachRepo.Name)
 			if err == nil {
-				repoLanguageDetails[*eachRepo.Name] = GetMapKeys(languages)
+				repoLanguageDetails[*eachRepo.Name] = utils.GetMapKeys(languages)
 			} else {
-				err = fmt.Errorf("Unable to list languages: %s", err.Error())
+				repoErr = fmt.Errorf("unable to list languages: %s", err.Error())
 			}
 		}
 	}
 	fmt.Print("\r" + progressBar.Render() + "\n")
 
-	return contributorRepoDetails, repoLanguageDetails, err
+	return contributorRepoDetails, repoLanguageDetails, repoErr
 }
 
 // HandleResponse - prepare and print the response
@@ -110,31 +111,5 @@ func (r *RequestHandler) HandleResponse(contributorRepoDetails map[string][]stri
 		repoDetails = strings.TrimSuffix(repoDetails, joinSeparator)
 		response := eachContributor + ";" + repoDetails + ";" + languageDetails
 		fmt.Printf(response + "\n")
-	}
-}
-
-// GetMapKeys - returns keys in a map
-func GetMapKeys(v interface{}) []string {
-	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Map {
-		return nil
-	}
-	t := rv.Type()
-	if t.Key().Kind() != reflect.String {
-		return nil
-	}
-	var result []string
-	for _, kv := range rv.MapKeys() {
-		result = append(result, kv.String())
-	}
-	return result
-}
-
-// handleNilString - return empty string if string pointer is nil
-func handleNilString(value *string) string {
-	if value == nil {
-		return ""
-	} else {
-		return *value
 	}
 }

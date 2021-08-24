@@ -1,9 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"gitsearch-cli/handlers"
+	"strings"
+
 	"gopkg.in/ukautz/clif.v1"
+
+	"gitsearch-cli/handlers"
 )
 
 // report constants
@@ -17,11 +21,16 @@ func callBackFunction(c *clif.Command) {
 	orgName := c.Option("organization").String()
 	authKey := c.Option("auth-key").String()
 
+	// validate options
+	if err := validateOptions(orgName, authKey); err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	// create git handler
 	gitHandler := handlers.NewRequestHandler(authKey)
 
 	// start progress bar
-	fmt.Println("Progress:")
 	progressBar := clif.NewProgressBar(defaultProgressBarSize).SetStyle(clif.ProgressBarStyleAscii)
 	progressBar.SetRenderWidth(defaultProgressBarRenderWidth)
 
@@ -37,6 +46,18 @@ func callBackFunction(c *clif.Command) {
 
 	// handle response
 	gitHandler.HandleResponse(contributorRepoDetails, repoLanguageDetails)
+}
+
+// validateOptions - validates the options
+func validateOptions(orgName, authKey string) error {
+	if strings.TrimSpace(orgName) == "" {
+		return errors.New("error: organization name cannot be empty")
+	}
+
+	if strings.TrimSpace(authKey) == "" {
+		return errors.New("error: auth key cannot be empty")
+	}
+	return nil
 }
 
 func main() {
