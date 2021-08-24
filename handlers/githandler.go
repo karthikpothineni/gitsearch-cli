@@ -22,7 +22,11 @@ type RequestHandler struct {
 }
 
 // NewRequestHandler - returns a new request handler object
-func NewRequestHandler(accessToken string) *RequestHandler {
+func NewRequestHandler(accessToken string) (*RequestHandler, error) {
+	if strings.TrimSpace(accessToken) == "" {
+		return nil, errors.New("invalid access token")
+	}
+
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: accessToken},
@@ -32,7 +36,7 @@ func NewRequestHandler(accessToken string) *RequestHandler {
 	return &RequestHandler{
 		GitClient:   client,
 		UserContext: ctx,
-	}
+	}, nil
 }
 
 // FetchRepositoriesInfo - returns all the repository information including contributors and languages
@@ -44,7 +48,7 @@ func (r *RequestHandler) FetchRepositoriesInfo(orgName string, progressBar clif.
 			err = errors.New("hit rate limit. only 5000 requests per hour are allowed")
 			return nil, nil, err
 		}
-		err = fmt.Errorf("error occurred while listing repos: %s", err.Error())
+		err = fmt.Errorf("error occurred while listing repos: %s", err)
 		return nil, nil, err
 	}
 

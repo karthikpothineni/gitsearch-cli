@@ -1,6 +1,10 @@
 package utils
 
-import "reflect"
+import (
+	"errors"
+	"reflect"
+	"strings"
+)
 
 // GetMapKeys - returns keys in a map
 func GetMapKeys(v interface{}) []string {
@@ -25,4 +29,16 @@ func HandleNilString(value *string) string {
 		return ""
 	}
 	return *value
+}
+
+// ValidateOptions - validates the options
+func ValidateOptions(orgName, authKey string) error {
+	if strings.TrimSpace(orgName) == "" {
+		return errors.New("error: organization name cannot be empty")
+	}
+
+	if strings.TrimSpace(authKey) == "" {
+		return errors.New("error: auth key cannot be empty")
+	}
+	return nil
 }
