@@ -42,3 +42,16 @@ func ValidateOptions(orgName, authKey string) error {
 	}
 	return nil
 }
+
+// RemoveDuplicates - removes duplicate elements from string slice
+func RemoveDuplicates(input []string) []string {
+	keys := make(map[string]bool)
+	var result []string
+	for _, entry := range input {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			result = append(result, entry)
+		}
+	}
+	return result
+}

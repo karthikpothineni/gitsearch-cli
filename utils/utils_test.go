@@ -87,3 +87,20 @@ func TestValidateOptionsAuthKeyError(t *testing.T) {
 	err := ValidateOptions(orgName, "")
 	check.Contains(err.Error(), "auth key cannot be empty")
 }
+
+// TestRemoveDuplicates - test removing duplicates when the input is valid
+func TestRemoveDuplicates(t *testing.T) {
+	check := assert.New(t)
+	input := []string{"Go", "Shell", "Go"}
+
+	result := RemoveDuplicates(input)
+	check.EqualValues([]string{"Go", "Shell"}, result)
+}
+
+// TestRemoveDuplicatesNilInput - test removing duplicates when the input is nil
+func TestRemoveDuplicatesNilInput(t *testing.T) {
+	check := assert.New(t)
+
+	result := RemoveDuplicates(nil)
+	check.Nil(result)
+}

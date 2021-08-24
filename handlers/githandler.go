@@ -105,14 +105,17 @@ func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repos
 // HandleResponse - prepare and print the response
 func (r *RequestHandler) HandleResponse(contributorRepoDetails map[string][]string, repoLanguageDetails map[string][]string) {
 	for eachContributor, repos := range contributorRepoDetails {
-		var repoDetails, languageDetails string
+		var repoDetails string
+		var allLanguages []string
 		for _, eachRepo := range repos {
 			repoDetails += eachRepo + joinSeparator
 			if languages, ok := repoLanguageDetails[eachRepo]; ok {
-				languageDetails = strings.Join(languages[:], joinSeparator)
+				allLanguages = append(allLanguages, languages...)
 			}
 		}
 		repoDetails = strings.TrimSuffix(repoDetails, joinSeparator)
+		allLanguages = utils.RemoveDuplicates(allLanguages)
+		languageDetails := strings.Join(allLanguages[:], joinSeparator)
 		response := eachContributor + ";" + repoDetails + ";" + languageDetails
 		fmt.Printf(response + "\n")
 	}
