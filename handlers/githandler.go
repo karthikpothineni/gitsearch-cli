@@ -80,8 +80,8 @@ func (r *RequestHandler) fetchRepoContributorsAndLanguages(repos []*github.Repos
 				for _, eachContributor := range contributors {
 					if eachContributor.Login != nil {
 						var contributorDetails string
-						userData, _, err := r.GitClient.Users.Get(r.UserContext, *eachContributor.Login)
-						if err != nil {
+						userData, _, userErr := r.GitClient.Users.Get(r.UserContext, *eachContributor.Login)
+						if userErr != nil {
 							contributorDetails = fmt.Sprintf("%s;%s;%s", *eachContributor.Login, "", "")
 						} else {
 							contributorDetails = fmt.Sprintf("%s;%s;%s", *eachContributor.Login, utils.HandleNilString(userData.Name), utils.HandleNilString(userData.Email))
